@@ -1,3 +1,21 @@
+/*
+ *=============================================================================
+ *
+ *		File Name:	ipt_queuematch.c
+ *
+ *	  Description:	match the queue number  of the special multi-queue network 
+ *	                card.  
+ *
+ *		  Version:	1.0
+ *		  Created:  22/8/2016
+ *		 Compiler:  gcc
+ *
+ *    	   Author:  XuHongping 
+ *    	   E-Mail:  mohists@hotmail.com 
+ *   	  Company:  BLUDON
+ *=============================================================================
+ */
+
 #include <linux/module.h>
 #include <linux/skbuff.h>
 #include <linux/ip.h>
@@ -9,19 +27,10 @@ MODULE_AUTHOR("xuhongping");
 MODULE_DESCRIPTION("iptables mutiple queue network device  match module.");
 MODULE_LICENSE("GPL");
 
-static int
-match(const struct sk_buff *skb,
-      const struct net_device *in,
-      const struct net_device *out,
-      const struct xt_match *match,
-      const void *matchinfo,
-      int offset,
-      unsigned int protoff,
-      int *hotdrop)
+static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 {
-        const struct ipt_queuematch *info = matchinfo;
-        __u16 queueid = skb->queue_mapping;
-		printk(KERN_INFO "*** match queueid: %d\n", queueid);
+        const struct ipt_queuematch_info *info = par->matchinfo;
+        __u8 queueid = skb->queue_mapping;
 
 		if (queueid == info->queueid)
 			return 1;
@@ -29,7 +38,7 @@ match(const struct sk_buff *skb,
 			return 0;
 }
 
-static struct ipt_match queue_match = {
+static struct xt_match queue_match = {
         .name           = "queuematch",
         .family          =AF_INET,
         .match          = match,

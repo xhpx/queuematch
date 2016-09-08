@@ -1,3 +1,21 @@
+/*
+ *=============================================================================
+ *
+ *		File Name:	libipt_queuematch.c
+ *
+ *	  Description:	match the queue number  of the special multi-queue network 
+ *	                card .  
+ *
+ *		  Version:	1.0
+ *		  Created:  22/8/2016
+ *		 Compiler:  gcc
+ *
+ *    	   Author:  XuHongping 
+ *    	   E-Mail:  mohists@hotmail.com 
+ *   	  Company:  BLUDON
+ *=============================================================================
+ */
+
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -6,7 +24,7 @@
 #include <ctype.h>
 
 #include <iptables.h>
-#include <linux/netfilter_ipv4/ipt_queuematch.h>
+#include "ipt_queuematch.h"
 
 static void help(void)
 {
@@ -14,7 +32,7 @@ static void help(void)
 			"queuematch %s options:\n"
 			"--queueid        ring id of network device\n"
 			"\nExamples:\n"
-			" iptables -A INPUT -m queuematch -k  1 -j NFQUEUE --queue-num 1 \n"
+			" iptables -A INPUT -m queuematch --queueid  1 -j NFQUEUE --queue-num 1 \n"
 			, QUEUEMATCH_VERSION);
 }
 
@@ -25,7 +43,7 @@ static struct option opts[] = {
 
 static void parse_pkts(const char* s,struct ipt_queuematch_info *info)
 {
-	char* buff,*cp;
+	char* buff;
 
 	buff = strdup(s);
 
@@ -42,7 +60,7 @@ static int parse(int c, char **argv, int invert, unsigned int *flags,
 	switch(c){
 		case '1':
 			if (*flags)
-				exit_error(PARAMETER_PROBLEM,
+				xtables_error(PARAMETER_PROBLEM,
 						"queueid `--queueid' may only be "
 						"specified once");
 			parse_pkts(argv[optind-1], info);
@@ -57,7 +75,7 @@ static int parse(int c, char **argv, int invert, unsigned int *flags,
 static void final_check(unsigned int flags)
 {
 	if (!flags)
-		exit_error(PARAMETER_PROBLEM,
+		xtables_error(PARAMETER_PROBLEM,
 				"\nqueuematch-parameter problem: for queueid usage type: iptables -m queuematch--help\n");
 }
 
@@ -72,13 +90,13 @@ static void print(const void *ip, const struct ipt_entry_match *match, int numer
 
 }
 
-static struct iptables_match queuematch=
+static struct xtables_match queuematch=
 {
 	.next           = NULL,
 	.name           = "queuematch",
-	.version        = IPTABLES_VERSION,
-	.size           = IPT_ALIGN(sizeof(struct ipt_queuematch_info)),
-	.userspacesize  = IPT_ALIGN(sizeof(struct ipt_queuematch_info)),
+	.version        = XTABLES_VERSION,
+	.size           = XT_ALIGN(sizeof(struct ipt_queuematch_info)),
+	.userspacesize  = XT_ALIGN(sizeof(struct ipt_queuematch_info)),
 	.help           = &help,
 	.parse          = &parse,
 	.final_check    = &final_check,
@@ -88,6 +106,7 @@ static struct iptables_match queuematch=
 
 void _init(void)
 {
-	register_match(&queuematch);
+
+	xtables_register_match(&queuematch);
 }
 

@@ -1,0 +1,7 @@
+
+  The purpose of this moudle  is to put place a packet of the multi-queue card
+into  a special NFQ queue.  
+
+Example: 
+  iptables -A input -m queuematch --queueid 1 -j NFQUEUE --queue-num 1
+
